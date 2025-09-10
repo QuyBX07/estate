@@ -54,4 +54,11 @@ public class PropertyController {
         propertyService.deleteProperty(id);
         return ResponseEntity.noContent().build();
     }
+
+    // chuc nang bien doi gai theo thoi gian
+    @GetMapping("/analytics/average-price")
+    public ResponseEntity<List<PropertyDTO>> getAveragePriceByMonth() {
+        propertyService.getAveragePriceByMonth();
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -12,14 +12,16 @@ public class PropertyMapper {
                 .title(dto.getTitle())
                 .address(dto.getAddress())
                 .city(dto.getCity())
-                .price(dto.getPrice())
-                .area(dto.getArea())
-                .room(dto.getRoom())
-                .bedroom(dto.getBedroom())
                 .seller(dto.getSeller())
                 .phone(dto.getPhone())
+                .price(dto.getPrice())
+                .area(dto.getArea())
+                .unitPrice(dto.getUnitPrice())
+                .postedDate(dto.getPostedDate())
                 .link(dto.getLink())
-                .datePost(dto.getDatePost())
+                .legalStatus(dto.getLegalStatus())
+                .facade(dto.getFacade())
+                .type(dto.getType())
                 .build();
     }
 
@@ -30,14 +32,16 @@ public class PropertyMapper {
                 .title(entity.getTitle())
                 .address(entity.getAddress())
                 .city(entity.getCity())
-                .price(entity.getPrice())
-                .area(entity.getArea())
-                .room(entity.getRoom())
-                .bedroom(entity.getBedroom())
                 .seller(entity.getSeller())
                 .phone(entity.getPhone())
+                .price(entity.getPrice())
+                .area(entity.getArea())
+                .unitPrice(entity.getUnitPrice())
+                .postedDate(entity.getPostedDate())
                 .link(entity.getLink())
-                .datePost(entity.getDatePost())
+                .legalStatus(entity.getLegalStatus())
+                .facade(entity.getFacade())
+                .type(entity.getType())
                 .build();
     }
 }

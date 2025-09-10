@@ -1,7 +1,6 @@
 package com.example.estate.dto;
 
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -13,12 +12,14 @@ public class PropertyDTO {
     private String title;
     private String address;
     private String city;
-    private Long price;
-    private String area;
-    private Integer room;
-    private Integer bedroom;
     private String seller;
     private String phone;
+    private Long price;
+    private Double area;
+    private Double unitPrice;
+    private LocalDateTime postedDate;
     private String link;
-    private LocalDateTime datePost;
+    private Boolean legalStatus;
+    private Integer facade;
+    private String type;
 }
