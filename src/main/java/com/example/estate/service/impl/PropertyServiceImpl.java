@@ -1,6 +1,6 @@
 package com.example.estate.service.impl;
 
-import com.example.estate.dto.PropertyDTO;
+import com.example.estate.dto.*;
 import com.example.estate.entity.Property;
 import com.example.estate.mapper.PropertyMapper;
 import com.example.estate.repository.PropertyRepository;
@@ -42,5 +42,27 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public void deleteProperty(String id) {
         propertyRepository.deleteById(id);
+    }
+
+    @Override
+    public List<CityStatisticsDTO> getCityStatistics() {
+        return propertyRepository.getCityStatistics();
+    }
+
+    @Override
+    public List<TopSellerDTO> getTopSellers(){
+        return propertyRepository.getTopSellers();
+    }
+    @Override
+    public List<TypeDistributionDTO> getTypeDistribution(){
+        return propertyRepository.getTypeDistribution();
+    }
+    @Override
+    public List<MonthlyPriceTrendDTO> getMonthlyPriceTrend(){
+        return propertyRepository.getPriceTrendByMonth();
+    }
+    @Override
+    public List<WebsiteStatsDTO> getTopWebsite(){
+        return propertyRepository.getTopWebsite();
     }
 }

@@ -21,4 +21,8 @@ public class PropertyDTO {
     private String phone;
     private String link;
     private LocalDateTime datePost;
+
+
 }
+
+
