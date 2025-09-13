@@ -78,4 +78,9 @@ public class PropertyController {
     public ResponseEntity<List<WebsiteStatsDTO>> getTopWebsite(){
         return ResponseEntity.ok(propertyService.getTopWebsite());
     }
+
+    @GetMapping("priceallocation")
+    public ResponseEntity<List<PriceAllocationDTO>> getPriceAllocation(){
+        return ResponseEntity.ok((propertyService.getPriceAllocation()));
+    }
 }

@@ -1,15 +1,14 @@
 package com.example.estate.dto;
 
-
 import lombok.*;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class CityStatisticsDTO {
     private String city;
     private long postcount;
-    private double avengerPrice;
+    private double averagePrice;
     private String popularType;
 }

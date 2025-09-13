@@ -12,18 +12,26 @@ import static org.springframework.data.mongodb.core.aggregation.Aggregation.newA
 public interface PropertyRepository extends MongoRepository<Property, String> {
 
     @Aggregation(pipeline = {
+            // Gom nhóm theo city + type để đếm số lượng và tính giá trung bình của type
             "{ $group: { " +
                     "   _id: { city: \"$city\", type: \"$type\" }, " +
                     "   count: { $sum: 1 }, " +
                     "   avgPrice: { $avg: \"$price\" } " +
                     "} }",
+
+            // Sắp xếp theo count giảm dần để lấy ra loại phổ biến nhất trước
             "{ $sort: { count: -1 } }",
+
+            // Gom nhóm lại theo city, chọn loại phổ biến nhất (first type),
+            // đồng thời tính tổng số bài đăng và giá trung bình của toàn city
             "{ $group: { " +
                     "   _id: \"$_id.city\", " +
                     "   postcount: { $sum: \"$count\" }, " +
                     "   popularType: { $first: \"$_id.type\" }, " +
                     "   averagePrice: { $avg: \"$avgPrice\" } " +
                     "} }",
+
+            // Project ra DTO
             "{ $project: { " +
                     "   _id: 0, " +
                     "   city: \"$_id\", " +
@@ -102,6 +110,29 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
             "{ $sort: { postcount: -1 } }"
     })
     List<WebsiteStatsDTO> getTopWebsite();
+
+    @Aggregation(pipeline = {
+            "{ $bucket: { " +
+                    "    groupBy: \"$price\", " +
+                    "    boundaries: [0, 2000000000, 5000000000, 10000000000, 20000000000, 100000000000], " +
+                    "    default: \"Trên 100 tỷ\", " +
+                    "    output: { count: { $sum: 1 } } " +
+                    "} }",
+            "{ $group: { " +
+                    "    _id: null, " +
+                    "    total: { $sum: \"$count\" }, " +
+                    "    data: { $push: { range: \"$_id\", count: \"$count\" } } " +
+                    "} }",
+            "{ $unwind: \"$data\" }",
+            "{ $project: { " +
+                    "    _id: 0, " +
+                    "    price: \"$data.range\", " +
+                    "    percent: { $round: [ { $multiply: [ { $divide: [\"$data.count\", \"$total\"] }, 100 ] }, 2 ] } " +
+                    "} }"
+    })
+    List<PriceAllocationDTO> getPriceAllocation();
+
+
 
 
 }

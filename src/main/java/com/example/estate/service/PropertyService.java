@@ -14,4 +14,5 @@ public interface PropertyService {
     List<TypeDistributionDTO> getTypeDistribution();
     List<MonthlyPriceTrendDTO> getMonthlyPriceTrend();
     List<WebsiteStatsDTO> getTopWebsite();
+    List<PriceAllocationDTO> getPriceAllocation();
 }

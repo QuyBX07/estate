@@ -65,4 +65,9 @@ public class PropertyServiceImpl implements PropertyService {
     public List<WebsiteStatsDTO> getTopWebsite(){
         return propertyRepository.getTopWebsite();
     }
+
+    @Override
+    public  List<PriceAllocationDTO> getPriceAllocation(){
+        return propertyRepository.getPriceAllocation();
+    }
 }
