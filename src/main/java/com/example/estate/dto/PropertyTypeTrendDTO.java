@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PropertyTypeTrendDTO {
-    private String date;   
     private String type;   
     private long count;    
     private double avgPrice;

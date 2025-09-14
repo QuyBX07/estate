@@ -221,9 +221,59 @@ public class PropertyServiceImpl implements PropertyService {
     // trend theo loai hinh
     @Override
     public List<PropertyTypeTrendDTO> getPropertyTypeTrendLast7Days() {
-        LocalDate sevenDaysAgo = LocalDate.now().minusDays(6); // tính cả hôm nay
+        LocalDate sevenDaysAgo = LocalDate.now().minusDays(6);
         Date fromDate = Date.from(sevenDaysAgo.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        return propertyRepository.aggregateTypeTrendByDate(fromDate);
+        return propertyRepository.aggregateTypeSummaryLast7Days(fromDate);
     }
 
+
+    @Override
+    public List<CityStatisticsDTO> getCityStatistics() {
+        return propertyRepository.getCityStatistics();
+    }
+
+    @Override
+    public List<TopSellerDTO> getTopSellers(){
+        return propertyRepository.getTopSellers();
+    }
+    @Override
+    public List<TypeDistributionDTO> getTypeDistribution(){
+        return propertyRepository.getTypeDistribution();
+    }
+    @Override
+    public List<MonthlyPriceTrendDTO> getMonthlyPriceTrend(){
+        return propertyRepository.getPriceTrendByMonth();
+    }
+    @Override
+    public List<WebsiteStatsDTO> getTopWebsite(){
+        return propertyRepository.getTopWebsite();
+    }
+
+    @Override
+    public  List<PriceAllocationDTO> getPriceAllocation(){
+        return propertyRepository.getPriceAllocation();
+    }
+
+    @Override
+    public PropertyOptionsDTO getOptions() {
+        List<Property> all = propertyRepository.findAll();
+
+        List<String> cities = all.stream()
+                .map(Property::getCity)
+                .filter(c -> c != null && !c.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> types = all.stream()
+                .map(Property::getType)
+                .filter(t -> t != null && !t.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
+
+        PropertyOptionsDTO dto = new PropertyOptionsDTO();
+        dto.setCities(cities);
+        dto.setTypes(types);
+
+        return dto;
+    }
 }

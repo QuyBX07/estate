@@ -24,4 +24,15 @@ public interface PropertyService {
     List<PropertyTypeSummaryDTO> getPropertyTypeSummary();
     //trend theo loai hinh
     List<PropertyTypeTrendDTO> getPropertyTypeTrendLast7Days();
+
+    //cua quang
+    List<CityStatisticsDTO> getCityStatistics();
+    List<TopSellerDTO> getTopSellers();
+    List<TypeDistributionDTO> getTypeDistribution();
+    List<MonthlyPriceTrendDTO> getMonthlyPriceTrend();
+    List<WebsiteStatsDTO> getTopWebsite();
+    List<PriceAllocationDTO> getPriceAllocation();
+
+    //option o dashboard
+    PropertyOptionsDTO getOptions();
 }

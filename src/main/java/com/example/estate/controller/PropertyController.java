@@ -1,6 +1,6 @@
 package com.example.estate.controller;
 
-import com.example.estate.dto.PropertyDTO;
+import com.example.estate.dto.*;
 import com.example.estate.service.PropertyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -60,5 +60,40 @@ public class PropertyController {
     public ResponseEntity<List<PropertyDTO>> getAveragePriceByMonth() {
         propertyService.getAveragePriceByMonth();
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/statistics/cities")
+    public ResponseEntity<List<CityStatisticsDTO>> getCityStatistics() {
+        return ResponseEntity.ok(propertyService.getCityStatistics());
+    }
+
+    @GetMapping("topsellers")
+    public ResponseEntity<List<TopSellerDTO>> getTopSlellers(){
+        return ResponseEntity.ok(propertyService.getTopSellers());
+    }
+
+    @GetMapping("TypeDistribution")
+    public ResponseEntity<List<TypeDistributionDTO>> getTyprDistribution(){
+        return ResponseEntity.ok(propertyService.getTypeDistribution());
+    }
+
+    @GetMapping("Month")
+    public ResponseEntity<List<MonthlyPriceTrendDTO>> getMonthlyPriceTrend(){
+        return ResponseEntity.ok(propertyService.getMonthlyPriceTrend());
+    }
+
+    @GetMapping("topwebsite")
+    public ResponseEntity<List<WebsiteStatsDTO>> getTopWebsite(){
+        return ResponseEntity.ok(propertyService.getTopWebsite());
+    }
+
+    @GetMapping("priceallocation")
+    public ResponseEntity<List<PriceAllocationDTO>> getPriceAllocation(){
+        return ResponseEntity.ok((propertyService.getPriceAllocation()));
+    }
+
+    @GetMapping("/options")
+    public ResponseEntity<PropertyOptionsDTO> getOptions() {
+        return ResponseEntity.ok(propertyService.getOptions());
     }
 }
