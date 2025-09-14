@@ -1,9 +1,6 @@
 package com.example.estate.service;
 
-import com.example.estate.dto.AveragePriceDTO;
-import com.example.estate.dto.PriceStatDTO;
-import com.example.estate.dto.PropertyDTO;
-import com.example.estate.dto.TimeStatDTO;
+import com.example.estate.dto.*;
 
 import java.util.List;
 
@@ -24,4 +21,7 @@ public interface PropertyService {
     List<PriceStatDTO> getAvgPriceByWeeks(int year, int month);
     List<PriceStatDTO> getAvgPriceByYear(int year);
 
+    List<PropertyTypeSummaryDTO> getPropertyTypeSummary();
+    //trend theo loai hinh
+    List<PropertyTypeTrendDTO> getPropertyTypeTrendLast7Days();
 }

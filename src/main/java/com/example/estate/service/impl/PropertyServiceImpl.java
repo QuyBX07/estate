@@ -1,9 +1,6 @@
 package com.example.estate.service.impl;
 
-import com.example.estate.dto.AveragePriceDTO;
-import com.example.estate.dto.PriceStatDTO;
-import com.example.estate.dto.PropertyDTO;
-import com.example.estate.dto.TimeStatDTO;
+import com.example.estate.dto.*;
 import com.example.estate.entity.Property;
 import com.example.estate.mapper.PropertyMapper;
 import com.example.estate.repository.PropertyRepository;
@@ -195,6 +192,38 @@ public class PropertyServiceImpl implements PropertyService {
             finalResult.add(new PriceStatDTO(label, avg));
         }
         return finalResult;
+    }
+
+    @Override
+    public List<PropertyTypeSummaryDTO> getPropertyTypeSummary() {
+        List<PropertyTypeSummaryDTO> raw = propertyRepository.aggregateByType();
+
+        long total = raw.stream().mapToLong(PropertyTypeSummaryDTO::getTotalListings).sum();
+
+        return raw.stream().map(dto -> {
+            // Thị phần %
+            dto.setMarketShare((double) dto.getTotalListings() / total * 100);
+
+            // Tìm city hot
+            Map<String, Long> cityCount = dto.getCities().stream()
+                    .collect(Collectors.groupingBy(c -> c, Collectors.counting()));
+            String hotCity = cityCount.entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse(null);
+
+            dto.setHotCity(hotCity);
+            dto.setCities(null); // Xoá cho gọn, không trả ra frontend
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // trend theo loai hinh
+    @Override
+    public List<PropertyTypeTrendDTO> getPropertyTypeTrendLast7Days() {
+        LocalDate sevenDaysAgo = LocalDate.now().minusDays(6); // tính cả hôm nay
+        Date fromDate = Date.from(sevenDaysAgo.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return propertyRepository.aggregateTypeTrendByDate(fromDate);
     }
 
 }

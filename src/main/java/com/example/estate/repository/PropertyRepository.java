@@ -1,6 +1,8 @@
 package com.example.estate.repository;
 
 import com.example.estate.dto.AveragePriceDTO;
+import com.example.estate.dto.PropertyTypeSummaryDTO;
+import com.example.estate.dto.PropertyTypeTrendDTO;
 import com.example.estate.entity.Property;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -79,4 +81,54 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
     })
     List<Map<String, Object>> getAvgPriceByYear(int year);
 
+
+    // thong ke theo loai hinh
+    @Aggregation(pipeline = {
+            "{ $group: { " +
+                    "  _id: '$type', " +
+                    "  totalListings: { $sum: 1 }, " +
+                    "  avgPrice: { $avg: '$price' }, " +
+                    "  avgArea: { $avg: '$area' }, " +
+                    "  minPrice: { $min: '$price' }, " +
+                    "  maxPrice: { $max: '$price' }, " +
+                    "  cities: { $push: '$city' } " +
+                    "} }",
+            "{ $project: { " +
+                    "  type: '$_id', " +   // 👈 gán _id vào field type
+                    "  totalListings: 1, " +
+                    "  avgPrice: 1, " +
+                    "  avgArea: 1, " +
+                    "  minPrice: 1, " +
+                    "  maxPrice: 1, " +
+                    "  cities: 1 " +
+                    "} }"
+    })
+    List<PropertyTypeSummaryDTO> aggregateByType();
+
+    //trend theo lại hinh bat dong san
+    @Aggregation(pipeline = {
+            "{ $match: { postedDate: { $gte: ?0 } } }",
+            "{ $project: { " +
+                    " type: 1, " +
+                    " price: 1, " +
+                    " area: 1, " +
+                    " date: { $dateToString: { format: '%Y-%m-%d', date: '$postedDate' } } " +
+                    "} }",
+            "{ $group: { " +
+                    " _id: { date: '$date', type: '$type' }, " +
+                    " count: { $sum: 1 }, " +
+                    " avgPrice: { $avg: '$price' }, " +
+                    " avgArea: { $avg: '$area' } " +
+                    "} }",
+            "{ $project: { " +
+                    " date: '$_id.date', " +
+                    " type: '$_id.type', " +
+                    " count: 1, " +
+                    " avgPrice: 1, " +
+                    " avgArea: 1, " +
+                    " _id: 0 " +
+                    "} }",
+            "{ $sort: { date: 1 } }"
+    })
+    List<PropertyTypeTrendDTO> aggregateTypeTrendByDate(Date fromDate);
 }
