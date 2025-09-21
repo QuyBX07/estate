@@ -1,6 +1,7 @@
 package com.example.estate.controller;
 
 import com.example.estate.dto.*;
+import com.example.estate.entity.Property;
 import com.example.estate.service.PropertyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +56,7 @@ public class PropertyController {
         return ResponseEntity.noContent().build();
     }
 
-    // chuc nang bien doi gai theo thoi gian
+    // chuc nang bien doi gia theo thoi gian
     @GetMapping("/analytics/average-price")
     public ResponseEntity<List<PropertyDTO>> getAveragePriceByMonth() {
         propertyService.getAveragePriceByMonth();
@@ -95,5 +96,18 @@ public class PropertyController {
     @GetMapping("/options")
     public ResponseEntity<PropertyOptionsDTO> getOptions() {
         return ResponseEntity.ok(propertyService.getOptions());
+    }
+
+    @GetMapping("/filter")
+    public List<Property> filter(
+            @RequestParam(required = false) List<String> types,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
+            @RequestParam(required = false) Integer minArea,
+            @RequestParam(required = false) Integer maxArea,
+            @RequestParam(required = false) String sort
+    ) {
+        return propertyService.filter(types, city, minPrice, maxPrice, minArea, maxArea, sort);
     }
 }

@@ -6,17 +6,18 @@ import com.example.estate.mapper.PropertyMapper;
 import com.example.estate.repository.PropertyRepository;
 import com.example.estate.service.PropertyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 public class PropertyServiceImpl implements PropertyService {
 
     private final PropertyRepository propertyRepository;
+
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public List<PropertyDTO> getAllProperties() {
@@ -193,27 +196,40 @@ public class PropertyServiceImpl implements PropertyService {
         }
         return finalResult;
     }
-
+    //
     @Override
     public List<PropertyTypeSummaryDTO> getPropertyTypeSummary() {
         List<PropertyTypeSummaryDTO> raw = propertyRepository.aggregateByType();
 
-        long total = raw.stream().mapToLong(PropertyTypeSummaryDTO::getTotalListings).sum();
+        long total = raw.stream()
+                .mapToLong(PropertyTypeSummaryDTO::getTotalListings)
+                .sum();
+
+        if (total == 0) {
+            return raw; // không có dữ liệu thì trả thẳng
+        }
 
         return raw.stream().map(dto -> {
             // Thị phần %
             dto.setMarketShare((double) dto.getTotalListings() / total * 100);
 
-            // Tìm city hot
-            Map<String, Long> cityCount = dto.getCities().stream()
-                    .collect(Collectors.groupingBy(c -> c, Collectors.counting()));
-            String hotCity = cityCount.entrySet().stream()
-                    .max(Map.Entry.comparingByValue())
-                    .map(Map.Entry::getKey)
-                    .orElse(null);
+            // Tìm city hot (lọc null trước)
+            if (dto.getCities() != null && !dto.getCities().isEmpty()) {
+                Map<String, Long> cityCount = dto.getCities().stream()
+                        .filter(Objects::nonNull) // 👈 bỏ city null
+                        .collect(Collectors.groupingBy(c -> c, Collectors.counting()));
 
-            dto.setHotCity(hotCity);
-            dto.setCities(null); // Xoá cho gọn, không trả ra frontend
+                String hotCity = cityCount.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse(null);
+
+                dto.setHotCity(hotCity);
+            } else {
+                dto.setHotCity(null);
+            }
+
+            dto.setCities(null); // xoá cho gọn, không trả ra frontend
             return dto;
         }).collect(Collectors.toList());
     }
@@ -276,4 +292,56 @@ public class PropertyServiceImpl implements PropertyService {
 
         return dto;
     }
+
+    //fillter
+    @Override
+    public List<Property> filter(
+            List<String> types,
+            String city,
+            Long minPrice,
+            Long maxPrice,
+            Integer minArea,
+            Integer maxArea,
+            String sort
+    ) {
+        Query query = new Query();
+
+        // Loại hình
+        if (types != null && !types.isEmpty()) {
+            query.addCriteria(Criteria.where("type").in(types));
+        }
+
+        // Thành phố
+        if (city != null && !city.isEmpty()) {
+            query.addCriteria(Criteria.where("city").is(city));
+        }
+
+        // Khoảng giá linh hoạt
+        if (minPrice != null && maxPrice != null) {
+            query.addCriteria(Criteria.where("price").gte(minPrice).lte(maxPrice));
+        } else if (minPrice != null) {
+            query.addCriteria(Criteria.where("price").gte(minPrice));
+        } else if (maxPrice != null) {
+            query.addCriteria(Criteria.where("price").lte(maxPrice));
+        }
+
+        // Khoảng diện tích linh hoạt
+        if (minArea != null && maxArea != null) {
+            query.addCriteria(Criteria.where("area").gte(minArea).lte(maxArea));
+        } else if (minArea != null) {
+            query.addCriteria(Criteria.where("area").gte(minArea));
+        } else if (maxArea != null) {
+            query.addCriteria(Criteria.where("area").lte(maxArea));
+        }
+
+        // Sort
+        if ("priceAsc".equals(sort)) query.with(Sort.by(Sort.Direction.ASC, "price"));
+        if ("priceDesc".equals(sort)) query.with(Sort.by(Sort.Direction.DESC, "price"));
+        if ("areaAsc".equals(sort)) query.with(Sort.by(Sort.Direction.ASC, "area"));
+        if ("areaDesc".equals(sort)) query.with(Sort.by(Sort.Direction.DESC, "area"));
+        if ("newest".equals(sort)) query.with(Sort.by(Sort.Direction.DESC, "postedDate"));
+
+        return mongoTemplate.find(query, Property.class);
+    }
+
 }

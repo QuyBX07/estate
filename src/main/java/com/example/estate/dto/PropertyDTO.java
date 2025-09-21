@@ -13,13 +13,17 @@ public class PropertyDTO {
     private String address;
     private String city;
     private String seller;
-    private String phone;
+    private String numberPhone;
     private Long price;
     private Double area;
-    private Double unitPrice;
+    private Double unit_Price;
     private LocalDateTime postedDate;
     private String link;
-    private Boolean legalStatus;
-    private Integer facade;
+    private String legal;
+    private Float frontage;     // float → Float
     private String type;
+    private Integer bedroom;    // int → Integer
+    private Integer bathroom;   // int → Integer
+    private String amenityLocation;
+    private String source;
 }

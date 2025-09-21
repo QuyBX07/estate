@@ -1,6 +1,7 @@
 package com.example.estate.service;
 
 import com.example.estate.dto.*;
+import com.example.estate.entity.Property;
 
 import java.util.List;
 
@@ -35,4 +36,13 @@ public interface PropertyService {
 
     //option o dashboard
     PropertyOptionsDTO getOptions();
+
+    //filter
+    List<Property> filter(List<String> types,
+                          String city,
+                          Long minPrice,
+                          Long maxPrice,
+                          Integer minArea,
+                          Integer maxArea,
+                          String sort);
 }

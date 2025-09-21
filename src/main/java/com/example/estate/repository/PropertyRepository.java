@@ -95,7 +95,7 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
                     "  cities: { $push: '$city' } " +
                     "} }",
             "{ $project: { " +
-                    "  type: '$_id', " +   // 👈 gán _id vào field type
+                    "  type: '$_id', " +
                     "  totalListings: 1, " +
                     "  avgPrice: 1, " +
                     "  avgArea: 1, " +
@@ -127,18 +127,20 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
     List<PropertyTypeTrendDTO> aggregateTypeSummaryLast7Days(Date fromDate);
 
     @Aggregation(pipeline = {
-            // Gom nhóm theo city + type để đếm số lượng và tính giá trung bình của type
+            // Bỏ qua những record không có city, type hoặc price
+            "{ $match: { city: { $exists: true, $ne: null, $ne: \"\" }, " +
+                    "           type: { $exists: true, $ne: null, $ne: \"\" }, " +
+                    "           price: { $exists: true, $ne: null } } }",
+
+            // Gom nhóm theo city + type
             "{ $group: { " +
                     "   _id: { city: \"$city\", type: \"$type\" }, " +
                     "   count: { $sum: 1 }, " +
                     "   avgPrice: { $avg: \"$price\" } " +
                     "} }",
 
-            // Sắp xếp theo count giảm dần để lấy ra loại phổ biến nhất trước
             "{ $sort: { count: -1 } }",
 
-            // Gom nhóm lại theo city, chọn loại phổ biến nhất (first type),
-            // đồng thời tính tổng số bài đăng và giá trung bình của toàn city
             "{ $group: { " +
                     "   _id: \"$_id.city\", " +
                     "   postcount: { $sum: \"$count\" }, " +
@@ -146,7 +148,6 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
                     "   averagePrice: { $avg: \"$avgPrice\" } " +
                     "} }",
 
-            // Project ra DTO
             "{ $project: { " +
                     "   _id: 0, " +
                     "   city: \"$_id\", " +
@@ -157,7 +158,11 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
     })
     List<CityStatisticsDTO> getCityStatistics();
 
+
     @Aggregation(pipeline = {
+            // Loại bỏ seller null hoặc rỗng
+            "{ $match: { seller: { $nin: [null, \"\"] } } }",
+
             "{ $group: { " +
                     "   _id: { seller: \"$seller\", phone: \"$phone\" }, " +
                     "   postCount: { $sum: 1 }, " +
@@ -184,6 +189,9 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
     List<TypeDistributionDTO> getTypeDistribution();
 
     @Aggregation(pipeline = {
+            // Loại bỏ document không có postedDate hoặc postedDate = null
+            "{ $match: { postedDate: { $exists: true, $ne: null } } }",
+
             "{ $group: { " +
                     "    _id: { year: { $year: \"$postedDate\" }, month: { $month: \"$postedDate\" } }, " +
                     "    averagePrice: { $avg: \"$price\" }, " +
@@ -227,18 +235,23 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
     List<WebsiteStatsDTO> getTopWebsite();
 
     @Aggregation(pipeline = {
+            "{ $match: { price: { $exists: true, $ne: null, $gt: 0 } } }", // bỏ giá <= 0
+
             "{ $bucket: { " +
                     "    groupBy: \"$price\", " +
-                    "    boundaries: [0, 2000000000, 5000000000, 10000000000, 20000000000, 100000000000], " +
-                    "    default: \"Trên 100 tỷ\", " +
+                    "    boundaries: [2000000000, 5000000000, 10000000000, 20000000000, 100000000000], " +
+                    "    default: 100000000001, " +
                     "    output: { count: { $sum: 1 } } " +
                     "} }",
+
             "{ $group: { " +
                     "    _id: null, " +
                     "    total: { $sum: \"$count\" }, " +
-                    "    data: { $push: { range: \"$_id\", count: \"$count\" } } " +
+                    "    data: { $push: { range: { $toLong: \"$_id\" }, count: \"$count\" } } " +
                     "} }",
+
             "{ $unwind: \"$data\" }",
+
             "{ $project: { " +
                     "    _id: 0, " +
                     "    price: \"$data.range\", " +
@@ -246,8 +259,6 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
                     "} }"
     })
     List<PriceAllocationDTO> getPriceAllocation();
-
-
 
 
 }
