@@ -313,7 +313,7 @@ public class PropertyServiceImpl implements PropertyService {
 
         // Thành phố
         if (city != null && !city.isEmpty()) {
-            query.addCriteria(Criteria.where("city").is(city));
+            query.addCriteria(Criteria.where("city").regex(city, "i"));
         }
 
         // Khoảng giá linh hoạt
@@ -339,7 +339,9 @@ public class PropertyServiceImpl implements PropertyService {
         if ("priceDesc".equals(sort)) query.with(Sort.by(Sort.Direction.DESC, "price"));
         if ("areaAsc".equals(sort)) query.with(Sort.by(Sort.Direction.ASC, "area"));
         if ("areaDesc".equals(sort)) query.with(Sort.by(Sort.Direction.DESC, "area"));
-        if ("newest".equals(sort)) query.with(Sort.by(Sort.Direction.DESC, "postedDate"));
+        if ("dateAsc".equals(sort)) query.with(Sort.by(Sort.Direction.ASC, "postedDate"));
+        if ("dateDesc".equals(sort)) query.with(Sort.by(Sort.Direction.DESC, "postedDate"));
+
 
         return mongoTemplate.find(query, Property.class);
     }

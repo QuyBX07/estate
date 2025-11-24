@@ -118,8 +118,8 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
             "{ $project: { " +
                     " type: '$_id', " +
                     " count: 1, " +
-                    " avgPrice: 1, " +
-                    " avgArea: 1, " +
+                    " avgPrice: { $ifNull: ['$avgPrice', 0] }, " +
+                    " avgArea: { $ifNull: ['$avgArea', 0] }, " +
                     " _id: 0 " +
                     "} }",
             "{ $sort: { count: -1 } }"
@@ -160,20 +160,18 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
 
 
     @Aggregation(pipeline = {
-            // Loại bỏ seller null hoặc rỗng
-            "{ $match: { seller: { $nin: [null, \"\"] } } }",
-
+            "{ $match: { seller: { $nin: [null, ''] } } }",
             "{ $group: { " +
-                    "   _id: { seller: \"$seller\", phone: \"$phone\" }, " +
-                    "   postCount: { $sum: 1 }, " +
-                    "   totalPrice: { $sum: \"$price\" } " +
+                    "_id: { seller: '$seller', phone: '$numberPhone' }, " +
+                    "postCount: { $sum: 1 }, " +
+                    "totalPrice: { $sum: '$price' } " +
                     "} }",
             "{ $project: { " +
-                    "   _id: 0, " +
-                    "   seller: \"$_id.seller\", " +
-                    "   phone: \"$_id.phone\", " +
-                    "   postCount: 1, " +
-                    "   totalPrice: 1 " +
+                    "_id: 0, " +
+                    "seller: '$_id.seller', " +
+                    "phone: '$_id.phone', " +
+                    "postCount: 1, " +
+                    "totalPrice: 1 " +
                     "} }",
             "{ $sort: { postCount: -1 } }",
             "{ $limit: 5 }"

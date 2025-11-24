@@ -16,10 +16,10 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 "http://localhost:5173",   // lúc dev
-                                "http://150.95.114.118",   // server deploy frontend
-                                "http://quy.name.vn" ,
+                                "https://150.95.110.242",   // server deploy frontend
+                                "https://quy.name.vn" ,
                                 "https://estate.quy.name.vn",
-                                "http://estate.quy.name.vn/"
+                                "https://estate.quy.name.vn/"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

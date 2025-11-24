@@ -22,7 +22,7 @@ public class Property {
     private String numberPhone;
     private Long price;
     private Double area;
-    private Double unit_Price;
+    private Double unit_price;
     private LocalDateTime postedDate;
     private String link;
     private String legal;
